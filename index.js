@@ -3,23 +3,7 @@ const db = require('./db');
 const app = express()
 const port = 3000
 app.use(express.json())
-
-//Função para calcular o IMC
-function calcularIMC(peso, altura) {
-  const imcCalculado = peso / (altura * altura);
-  const imc = parseFloat(imcCalculado.toFixed(2));
-  let status = ""
-  if (imc < 18.5) {
-    status = "Abaixo do peso normal";
-  } else if (imc < 25) {
-    status = "Peso normal";
-  } else if (imc < 30) {
-    status = "Excesso de Peso";
-  } else {
-    status = "Obesidade";
-  }
-  return { imc, status }
-}
+const calcularIMC = require('./imc')
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -30,7 +14,7 @@ app.get('/sextou', (req, res) => {
 app.get('/teste', (req, res) => {
   res.send('atualizou!')
 })
-app.get('/relatorio', async (req, res) => {
+app.get('/paciente', async (req, res) => {
   try {
     const [rows] = await db.execute('select * from pacientes')
     res.status(200).json(rows)
@@ -55,6 +39,27 @@ app.get('/paciente/:id', async (req, res) => {
       );
     }
     res.status(200).json(rows[0])
+  } catch (error) {
+    res.status(500).json(
+      {
+        mensagem: "Erro ao buscar o paciente.",
+        detalhes: error.message
+      }
+    )
+  }
+
+})
+//Remover um paciente
+app.delete('/paciente/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.execute('delete from pacientes where id = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json(
+        "Paciente não encontrado"
+      );
+    }
+    res.status(200).json({mensagem:"O paciente foi removido com sucesso."})
   } catch (error) {
     res.status(500).json(
       {
