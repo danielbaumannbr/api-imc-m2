@@ -70,7 +70,7 @@ app.delete('/paciente/:id', async (req, res) => {
   }
 
 })
-//Cadastras novo paciente
+//Cadastrar novo paciente
 app.post('/paciente', async (req, res) => {
   const { nome, idade, altura, peso } = req.body;
   if (!nome || !idade || !altura || !peso) {
@@ -93,6 +93,30 @@ app.post('/paciente', async (req, res) => {
       status
     }
     );
+  } catch (error) {
+    res.status(500).json(
+      {
+        mensagem: "Erro ao salvar os dados.",
+        detalhes: error.message
+      }
+    )
+  }
+});
+//editar um paciente
+app.put('/paciente/:id', async (req, res) => {
+  const {id} = req.params;
+  const { nome, idade, altura, peso } = req.body;
+  if (!nome || !idade || !altura || !peso) {
+    res.status(400).json(
+      {
+        mensagem: "Verifique se todos os campos foram preenchidos corretamente.",
+        detalhes: error.message
+      })
+  }
+  const { imc, status } = calcularIMC(Number(peso), Number(altura));
+  try {
+    const [result] = await db.execute("UPDATE pacientes set nome=?,idade=?,altura=?,peso=?,imc=?,status=? where id=?", [nome, idade, altura, peso, imc, status,id]);
+    res.status(200).json({mensagem:"Paciente atualizado com sucesso."});
   } catch (error) {
     res.status(500).json(
       {
