@@ -27,6 +27,20 @@ app.get('/paciente/idosos', async (req, res) => {
     )
   }
 });
+app.get('/paciente/buscar', async (req, res) => {
+  const {nome}=req.query;
+  try {
+    const [rows] = await db.execute('SELECT * FROM pacientes WHERE nome LIKE ?',[`%${nome}%`]);
+    res.status(200).json(rows)
+  } catch (error) {
+    res.status(500).json(
+      {
+        mensagem: "Erro ao buscar o relatório.",
+        detalhes: error.message
+      }
+    )
+  }
+});
 
 app.get('/paciente', async (req, res) => {
   try {
