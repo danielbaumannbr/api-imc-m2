@@ -14,6 +14,20 @@ app.get('/sextou', (req, res) => {
 app.get('/teste', (req, res) => {
   res.send('atualizou!')
 })
+app.get('/paciente/idosos', async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT * FROM `pacientes` WHERE `idade`> 60;')
+    res.status(200).json(rows)
+  } catch (error) {
+    res.status(500).json(
+      {
+        mensagem: "Erro ao buscar o relatório.",
+        detalhes: error.message
+      }
+    )
+  }
+});
+
 app.get('/paciente', async (req, res) => {
   try {
     const [rows] = await db.execute('select * from pacientes')
@@ -59,7 +73,7 @@ app.delete('/paciente/:id', async (req, res) => {
         "Paciente não encontrado"
       );
     }
-    res.status(200).json({mensagem:"O paciente foi removido com sucesso."})
+    res.status(200).json({ mensagem: "O paciente foi removido com sucesso." })
   } catch (error) {
     res.status(500).json(
       {
@@ -104,7 +118,7 @@ app.post('/paciente', async (req, res) => {
 });
 //editar um paciente
 app.put('/paciente/:id', async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
   const { nome, idade, altura, peso } = req.body;
   if (!nome || !idade || !altura || !peso) {
     res.status(400).json(
@@ -115,8 +129,8 @@ app.put('/paciente/:id', async (req, res) => {
   }
   const { imc, status } = calcularIMC(Number(peso), Number(altura));
   try {
-    const [result] = await db.execute("UPDATE pacientes set nome=?,idade=?,altura=?,peso=?,imc=?,status=? where id=?", [nome, idade, altura, peso, imc, status,id]);
-    res.status(200).json({mensagem:"Paciente atualizado com sucesso."});
+    const [result] = await db.execute("UPDATE pacientes set nome=?,idade=?,altura=?,peso=?,imc=?,status=? where id=?", [nome, idade, altura, peso, imc, status, id]);
+    res.status(200).json({ mensagem: "Paciente atualizado com sucesso." });
   } catch (error) {
     res.status(500).json(
       {
